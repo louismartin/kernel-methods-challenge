@@ -9,6 +9,7 @@ n_samples = len(Xtr)
 
 classifier = svm.SVC(C=1., kernel='rbf', gamma=0.1)
 
+# Perform PCA ?
 perform_pca = False
 if perform_pca:
     pca = PCA(n_components=len(Xtr[0]))
@@ -18,11 +19,12 @@ if perform_pca:
 else:
     Xtr_ = Xtr
 
+# Fit
 assert len(Xtr_) == len(Ytr)
 print('performing classification with {} classifier'.format(classifier))
 classifier.fit(Xtr_[:n_samples / 2], Ytr[:n_samples / 2])
 
-# Now predict the value of the digit on the second half:
+# Predict
 expected = Ytr[n_samples / 2:]
 predicted = classifier.predict(Xtr_[n_samples / 2:])
 
