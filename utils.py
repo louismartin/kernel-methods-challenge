@@ -10,7 +10,7 @@ CM_DIR = os.path.join(PATH, "conf_mat")
 
 def plot_confusion_matrix(cm, classes,
                           normalize=False, title='Confusion matrix',
-                          cmap=plt.cm.Reds, directory=CM_DIR):
+                          cmap=plt.cm.Reds, directory=CM_DIR, classifier="no classifier specified"):
     """
     This function prints and plots the confusion matrix.
     It also saves it in a directory called conf_mat
@@ -18,7 +18,7 @@ def plot_confusion_matrix(cm, classes,
     """
     if not os.path.isdir(directory):
         os.makedirs(directory)
-    saving_dir = os.path.join(directory, title)
+    saving_dir = os.path.join(directory, title + classifier)
     plt.savefig(saving_dir)
 
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
