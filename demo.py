@@ -1,3 +1,5 @@
+import os
+
 from src.utils import DATA_DIR
 from src.data_processing import load_images
 
