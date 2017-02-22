@@ -1,13 +1,26 @@
+import os
+
 import itertools
 import numpy as np
 import matplotlib.pyplot as plt
 
+PATH = os.path.dirname(os.path.realpath(__file__))
+CM_DIR = os.path.join(PATH, "conf_mat")
 
-def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Reds):
+
+def plot_confusion_matrix(cm, classes,
+                          normalize=False, title='Confusion matrix',
+                          cmap=plt.cm.Reds, directory=CM_DIR):
     """
     This function prints and plots the confusion matrix.
+    It also saves it in a directory called conf_mat
     Normalization can be applied by setting `normalize=True`.
     """
+    if not os.path.isdir(directory):
+        os.makedirs(directory)
+    saving_dir = os.path.join(directory, title)
+    plt.savefig(saving_dir)
+
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
