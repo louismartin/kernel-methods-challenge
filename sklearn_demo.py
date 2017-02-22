@@ -9,14 +9,14 @@ from utils import plot_confusion_matrix
 
 n_samples = len(Xtr)
 
-# classifier = svm.SVC(C=1., kernel='rbf', gamma=0.1)
-classifier = OneVsRestClassifier(svm.SVC(C=1., kernel='rbf', gamma=0.1))
+classifier = svm.SVC(C=1., kernel='rbf', gamma=0.1)
+# classifier = OneVsRestClassifier(KNeighborsClassifier(n_neighbors=10))
 # classifier = KNeighborsClassifier(n_neighbors=10)
 
 # Perform PCA ?
-perform_pca = False
+perform_pca = True
 if perform_pca:
-    pca = PCA(n_components="mle", svd_solver="full")
+    pca = PCA(n_components=len(Xtr[0]))
     Xtr_ = pca.fit_transform(Xtr)
     print(pca.explained_variance_ratio_)
 
