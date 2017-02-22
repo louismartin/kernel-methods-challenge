@@ -18,7 +18,7 @@ def plot_confusion_matrix(cm, classes,
     """
     if not os.path.isdir(directory):
         os.makedirs(directory)
-    saving_dir = os.path.join(directory, title + classifier)
+    saving_dir = os.path.join(directory, title + "{}".format(classifier))
     plt.savefig(saving_dir)
 
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
