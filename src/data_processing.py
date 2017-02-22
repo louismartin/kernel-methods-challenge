@@ -5,11 +5,18 @@ import numpy as np
 
 
 def load_images(path):
-    images = np.genfromtxt(path, delimiter=",")
-    # There is a trainling comma which adds one pixel, reshape to normal shape
-    n_images = images.shape[0]
-    n_pixels = images.shape[1] - 1
-    images = images[:, :n_pixels]
+    """ Read a csv file from path and returns a numpy array """
+    # Check if we have a .npy (numpy) version of the images (faster)
+    path_npy = path.replace(".csv", ".npy")
+    if os.path.exists(path_npy):
+        images = np.load(path_npy)
+    else:
+        images = np.genfromtxt(path, delimiter=",")
+        # A trailing comma adds one pixel, remove it
+        n_images = images.shape[0]
+        n_pixels = images.shape[1] - 1
+        images = images[:, :n_pixels]
+        np.save(path_npy, images)
     return images
 
 
