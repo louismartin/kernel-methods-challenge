@@ -20,11 +20,23 @@ def load_images(path):
     return images
 
 
+def vec2img(X):
+    """
+    Takes images of shape (n_samples, 3072) or (3072,) and reshape to
+    (n_samples, 32, 32 ,3)
+    """
+    if len(X.shape) == 1:
+        X = np.expand_dims(X, axis=0)
+    assert X.shape[1] == 3*32*32
+    n_samples = X.shape[0]
+    X = X.reshape((n_samples, 3, 32, 32))
+    X = X.transpose((0, 2, 3, 1))
+    return X
+
+
 def plot_image(img):
     assert img.shape == (3072,)
-    # Reshape image to (3, 32, 32) then to (32, 32, 3)
-    img = img.reshape((3, 32, 32))
-    img = img.transpose((1, 2, 0))
+    img = vec2img(img)[0]
     # Convert centered values to ints between 0 and 255
     img = ((img - np.min(img))/(img.max() - img.min()) * 255).astype(np.uint8)
     plt.axis('off')
