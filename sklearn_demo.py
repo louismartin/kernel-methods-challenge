@@ -5,7 +5,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 
 from demo import Xtr, Ytr, Ytr_unique
-from utils import plot_confusion_matrix
+from src.utils import plot_confusion_matrix
 
 n_samples = len(Xtr)
 
@@ -26,12 +26,12 @@ else:
 # Fit
 assert len(Xtr_) == len(Ytr)
 print('performing classification with {} classifier'.format(classifier))
-classifier.fit(Xtr_[:n_samples / 2], Ytr[:n_samples / 2])
+classifier.fit(Xtr_[:n_samples // 2], Ytr[:n_samples // 2])
 
 # Predict
-expected = Ytr[n_samples / 2:]
+expected = Ytr[n_samples // 2:]
 print('performing prediction with {} classifier'.format(classifier))
-predicted = classifier.predict(Xtr_[n_samples / 2:])
+predicted = classifier.predict(Xtr_[n_samples // 2:])
 
 # Confusion Matrix
 conf_mat = confusion_matrix(expected, predicted)
