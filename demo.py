@@ -17,7 +17,8 @@ Ytr = np.array(Ytr_csv.tolist())
 
 print("Loaded images of shape {}".format(Xtr.shape))
 
-plot_image(Xtr[1])
+red_car_index = 3132
+plot_image(Xtr[red_car_index])
 
 data_augmente = True
 if data_augmente:
