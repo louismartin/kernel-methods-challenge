@@ -123,3 +123,29 @@ def learn_dictionary(Xtr, n_atoms, atom_width, plot=True):
     if plot:
         plt.plot(errors)
     return atoms
+
+
+def extract_all_patches(Xtr, patch_width):
+    """Extract all non overlapping patches of the images in Xtr"""
+    # We will work on images and patches of shape (None, width, height, 3)
+    Xtr = vec2img(Xtr)
+    img_width = Xtr.shape[1]
+    patch_per_side = img_width // patch_width
+    n_patches = patch_per_side**2
+
+    coords = np.arange(0, img_width - patch_width, patch_width)
+    top_left_X, top_left_Y = np.meshgrid(coords, coords)
+    top_left_X = top_left_X.flatten()
+    top_left_Y = top_left_Y.flatten()
+    top_left_X = top_left_X.repeat(patch_width * patch_width)\
+                           .reshape(n_patches, patch_width, patch_width)
+    top_left_Y = top_left_Y.repeat(patch_width * patch_width)\
+                           .reshape(n_patches, patch_width, patch_width)
+    X, Y = np.meshgrid(range(patch_width), range(patch_width))
+    X = np.expand_dims(X, axis=0).repeat(n_patches, axis=0)
+    Y = np.expand_dims(Y, axis=0).repeat(n_patches, axis=0)
+    X += top_left_X
+    Y += top_left_Y
+
+    patches = Xtr[:, Y, X, :]
+    return patches
