@@ -123,6 +123,8 @@ def learn_dictionary(Xtr, n_atoms, atom_width, plot=False):
         # Dictionary update
         atoms = dictionary_update(data, atoms, coefs, iterations=100)
         errors[2*i+1] = np.linalg.norm(np.dot(coefs, atoms) - data)**2
+    path = os.path.join(DATA_DIR, "dictionary_learning_errors.npy")
+    np.save(path, errors)
     if plot:
         plt.plot(errors)
     return atoms
@@ -136,7 +138,7 @@ def extract_all_patches(Xtr, patch_width):
     patch_per_side = img_width // patch_width
     n_patches = patch_per_side**2
 
-    coords = np.arange(0, img_width - patch_width, patch_width)
+    coords = np.arange(0, img_width - patch_width + 1, patch_width)
     top_left_X, top_left_Y = np.meshgrid(coords, coords)
     top_left_X = top_left_X.flatten()
     top_left_Y = top_left_Y.flatten()
@@ -164,7 +166,7 @@ class Dictionary:
         self.atoms = learn_dictionary(Xtr,
                                       n_atoms=self.n_atoms,
                                       atom_width=self.atom_width,
-                                      plot=True)
+                                      plot=False)
 
     def get_representation(self, Xtr):
         n_samples = Xtr.shape[0]
