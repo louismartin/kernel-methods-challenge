@@ -48,3 +48,14 @@ def initialize_atoms(Xtr, n_atoms, atom_width):
     # Cast back from (n_atoms, width, height, 3) to (n_atoms, n_pixels)
     atoms = img2vec(atoms)
     return atoms
+
+
+def sparsity_projection(coefs, sparsity):
+    """Keep only k largest coefs on each row"""
+    # Find the kth largest elements (pivots)
+    pivots = np.partition(abs(coefs), -sparsity, axis=1)[:, -sparsity]
+    to_keep = abs(coefs) >= pivots[np.newaxis].T
+    # Only keep these kth largest coefficients
+    # (careful sometimes more than k elements kept due to equal values)
+    coefs = coefs * to_keep
+    return coefs
