@@ -24,4 +24,4 @@ if data_augmente:
 
     Xtr_reshaped = vec2img(Xtr)
     tf_Xtr_reshaped, tf_Ytr = transform_T(Xtr_reshaped, Ytr)
-    Xtr = img2vec(Xtr_reshaped)
+    Xtr = img2vec(tf_Xtr_reshaped)
