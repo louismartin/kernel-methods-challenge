@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 
 from src.data_processing import vec2img, img2vec
 # ----- Dictionary learning -----
@@ -71,7 +72,7 @@ def sparse_coding(data, atoms, coefs, sparsity, iterations=100):
         coefs: (n_samples, n_atoms)
     """
     lambd = 1/np.linalg.norm(np.dot(atoms.T, atoms))
-    for i in range(iterations):
+    for i in tqdm(range(iterations)):
         error = np.dot(coefs, atoms) - data
         coefs = sparsity_projection(coefs - lambd * np.dot(error, atoms.T),
                                     sparsity)
@@ -94,7 +95,7 @@ def dictionary_update(data, atoms, coefs, iterations=100):
         coefs: (n_samples, n_atoms)
     """
     lambd = 1/np.linalg.norm(np.dot(coefs.T, coefs))
-    for i in range(iterations):
+    for i in tqdm(range(iterations)):
         error = np.dot(coefs, atoms) - data
         atoms = dictionary_projection(atoms - lambd * np.dot(coefs.T, error))
     return atoms
