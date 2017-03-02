@@ -66,10 +66,10 @@ def transform_T(Xtr_reshaped, Ytr):
 
     tf_Xtr_reshaped = np.ones((size_sample * len(x_translations), number_rows, number_cols, 3),)
     tf_Ytr = np.ones(size_sample * len(x_translations),)
-    for j in xrange(len(x_translations)):
+    for j in range(len(x_translations)):
         x_trans = x_translations[j]
         y_trans = y_translations[j]
-        for i in xrange(size_sample):
+        for i in range(size_sample):
             tf_Xtr_reshaped[i - 1 + j * size_sample] = tf.warp(Xtr_reshaped[i - 1],
                                                                AffineTransform(translation=(x_trans, y_trans)))
             tf_Ytr[i - 1 + j * size_sample] = Ytr[i - 1]
