@@ -1,8 +1,11 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
 from src.data_processing import vec2img, img2vec
+from src.utils import DATA_DIR
 # ----- Dictionary learning -----
 # Inspired from https://github.com/louismartin/dictionary-learning
 
@@ -102,7 +105,7 @@ def dictionary_update(data, atoms, coefs, iterations=100):
     return atoms
 
 
-def learn_dictionary(Xtr, n_atoms, atom_width, plot=True):
+def learn_dictionary(Xtr, n_atoms, atom_width, plot=False):
     n_samples = Xtr.shape[0]
     atoms = initialize_atoms(Xtr, n_atoms=n_atoms, atom_width=atom_width)
     n_patches = 10 * n_samples
@@ -155,6 +158,7 @@ class Dictionary:
     def __init__(self, n_atoms, atom_width):
         self.n_atoms = n_atoms
         self.atom_width = atom_width
+        self.save_path = os.path.join(DATA_DIR, "atoms.npy")
 
     def fit(self, Xtr):
         self.atoms = learn_dictionary(Xtr,
@@ -178,3 +182,9 @@ class Dictionary:
                               sparsity=self.n_atoms//2, iterations=1000)
         coefs = coefs.reshape(n_samples, self.n_atoms * n_patches)
         return coefs
+
+    def save(self):
+        np.save(self.save_path, self.atoms)
+
+    def load(self):
+        self.atoms = np.load(self.save_path)
