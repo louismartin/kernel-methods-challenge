@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
@@ -82,7 +83,7 @@ def sparse_coding(data, atoms, coefs, sparsity, iterations=100):
 def dictionary_projection(atoms):
     """Scale all atoms to unit norm"""
     norms = np.linalg.norm(atoms, axis=1)
-    norms = np.tile(norms, (3072, 1)).T
+    norms = np.tile(norms, (atoms.shape[1], 1)).T
     atoms = atoms / norms
     return atoms
 
@@ -98,4 +99,27 @@ def dictionary_update(data, atoms, coefs, iterations=100):
     for i in tqdm(range(iterations)):
         error = np.dot(coefs, atoms) - data
         atoms = dictionary_projection(atoms - lambd * np.dot(coefs.T, error))
+    return atoms
+
+
+def learn_dictionary(Xtr, n_atoms, atom_width, plot=True):
+    n_samples = Xtr.shape[0]
+    atoms = initialize_atoms(Xtr, n_atoms=n_atoms, atom_width=atom_width)
+    n_patches = 10 * n_samples
+    data = random_patches(Xtr, n_patches, atom_width)
+    coefs = np.random.rand(n_patches, n_atoms)
+
+    # Learn the dictionary
+    iterations = 10
+    errors = np.zeros(2*iterations)
+    for i in tqdm(range(iterations)):
+        # Sparse coding
+        coefs = sparse_coding(data, atoms, coefs, sparsity=5, iterations=100)
+        errors[2*i] = np.linalg.norm(np.dot(coefs, atoms) - data)**2
+
+        # Dictionary update
+        atoms = dictionary_update(data, atoms, coefs, iterations=50)
+        errors[2*i+1] = np.linalg.norm(np.dot(coefs, atoms) - data)**2
+    if plot:
+        plt.plot(errors)
     return atoms
