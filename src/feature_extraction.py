@@ -149,3 +149,32 @@ def extract_all_patches(Xtr, patch_width):
 
     patches = Xtr[:, Y, X, :]
     return patches
+
+
+class Dictionary:
+    def __init__(self, n_atoms, atom_width):
+        self.n_atoms = n_atoms
+        self.atom_width = atom_width
+
+    def fit(self, Xtr):
+        self.atoms = learn_dictionary(Xtr,
+                                      n_atoms=self.n_atoms,
+                                      atom_width=self.atom_width,
+                                      plot=True)
+
+    def get_representation(self, Xtr):
+        n_samples = Xtr.shape[0]
+
+        # Extract all non overlapping patches of each image
+        patches = extract_all_patches(Xtr, patch_width=self.atom_width)
+        n_patches = patches.shape[1]
+        patches = patches.reshape(n_samples * n_patches,
+                                  self.atom_width, self.atom_width, 3)
+        patches = img2vec(patches)
+
+        # Get sparse representation of all patches
+        coefs = np.random.rand(patches.shape[0], self.n_atoms)
+        coefs = sparse_coding(patches, self.atoms, coefs,
+                              sparsity=self.n_atoms//2, iterations=1000)
+        coefs = coefs.reshape(n_samples, self.n_atoms * n_patches)
+        return coefs
