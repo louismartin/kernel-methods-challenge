@@ -110,15 +110,15 @@ def learn_dictionary(Xtr, n_atoms, atom_width, plot=True):
     coefs = np.random.rand(n_patches, n_atoms)
 
     # Learn the dictionary
-    iterations = 10
+    iterations = 100
     errors = np.zeros(2*iterations)
     for i in tqdm(range(iterations)):
         # Sparse coding
-        coefs = sparse_coding(data, atoms, coefs, sparsity=5, iterations=100)
+        coefs = sparse_coding(data, atoms, coefs, sparsity=5, iterations=50)
         errors[2*i] = np.linalg.norm(np.dot(coefs, atoms) - data)**2
 
         # Dictionary update
-        atoms = dictionary_update(data, atoms, coefs, iterations=50)
+        atoms = dictionary_update(data, atoms, coefs, iterations=100)
         errors[2*i+1] = np.linalg.norm(np.dot(coefs, atoms) - data)**2
     if plot:
         plt.plot(errors)
