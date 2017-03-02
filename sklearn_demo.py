@@ -19,19 +19,20 @@ if perform_pca:
     pca = PCA(n_components=500)
     Xtr_ = pca.fit_transform(Xtr)
     print(pca.explained_variance_ratio_)
-
 else:
     Xtr_ = Xtr
 
 # Fit
 assert len(Xtr_) == len(Ytr)
 print('performing classification with {} classifier'.format(classifier))
-classifier.fit(Xtr_[:n_samples // 2], Ytr[:n_samples // 2])
+train_ratio = 0.8
+n_train_samples = int(n_samples * train_ratio)
+classifier.fit(Xtr_[:n_train_samples], Ytr[:n_train_samples])
 
 # Predict
-expected = Ytr[n_samples // 2:]
+expected = Ytr[n_train_samples:]
 print('performing prediction with {} classifier'.format(classifier))
-predicted = classifier.predict(Xtr_[n_samples // 2:])
+predicted = classifier.predict(Xtr_[n_train_samples:])
 
 # Confusion Matrix
 conf_mat = confusion_matrix(expected, predicted)
