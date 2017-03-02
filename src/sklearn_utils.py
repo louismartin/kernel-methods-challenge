@@ -1,9 +1,9 @@
 import numpy as np
 from sklearn import preprocessing
-from sklearn.cross_validation import StratifiedKFold
+from sklearn.model_selection import KFold
 
 
-def cross_validate(Xtr, Ytr, classifier, nb_folds=10):
+def cross_validate(_input_X, _input_Y, classifier, nb_folds=10):
     """
     Cross-validate and returns the predictions.
     :param _input_X: (n_samples, n_features) np.array
@@ -12,21 +12,23 @@ def cross_validate(Xtr, Ytr, classifier, nb_folds=10):
     :param nb_folds: integer
     :return: Vector of predictions
     """
-    cv_folds = StratifiedKFold(Ytr, nb_folds, shuffle=True)
-    pred = np.zeros(Ytr.shape)  # vector of 0 in which to store the predictions
+    SKF = KFold(n_splits=nb_folds, random_state=7)
+    cv_folds = SKF.split(np.array(_input_X), np.array(_input_Y).reshape(_input_Y.shape[0]))
+    pred = np.zeros(_input_Y.shape)
+
     for tr, te in cv_folds:
-        # Restrict data to train/test folds
-        Xtr = np.array(Xtr)[tr, :]
-        ytr = np.array(Ytr)[tr]
-        Xte = np.array(Xtr)[te, :]
-        yte = np.array(Ytr)[te]
 
-        # Scale data
-        scaler = preprocessing.StandardScaler()  # create scaler
-        Xtr = scaler.fit_transform(Xtr)  # fit the scaler to the training data and transform training data
-        Xte = scaler.transform(Xte)  # transform test data
+        Xtr = np.array(_input_X)[tr, :]
+        ytr = np.array(_input_Y)[tr]
+        Xte = np.array(_input_X)[te, :]
+        yte = np.array(_input_Y)[te]
 
-        # Fit classifier
+        # Scale
+        scaler = preprocessing.StandardScaler()
+        Xtr = scaler.fit_transform(Xtr)
+        Xte = scaler.transform(Xte)
+
+        # Fit
         classifier.fit(Xtr, ytr)
 
         # Predictions
