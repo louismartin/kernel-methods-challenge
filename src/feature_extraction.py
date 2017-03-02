@@ -82,3 +82,17 @@ def dictionary_projection(atoms):
     norms = np.tile(norms, (3072, 1)).T
     atoms = atoms / norms
     return atoms
+
+
+def dictionary_update(data, atoms, coefs, iterations=100):
+    """Update atoms given fixed coefs, to represent the data
+    Shapes:
+        data: (n_samples, n_pixels)
+        atoms: (n_atoms, n_pixels)
+        coefs: (n_samples, n_atoms)
+    """
+    lambd = 1/np.linalg.norm(np.dot(coefs.T, coefs))
+    for i in range(iterations):
+        error = np.dot(coefs, atoms) - data
+        atoms = dictionary_projection(atoms - lambd * np.dot(coefs.T, error))
+    return atoms
