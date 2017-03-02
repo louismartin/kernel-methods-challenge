@@ -74,3 +74,11 @@ def sparse_coding(data, atoms, coefs, sparsity, iterations=100):
         coefs = sparsity_projection(coefs - lambd * np.dot(error, atoms.T),
                                     sparsity)
     return coefs
+
+
+def dictionary_projection(atoms):
+    """Scale all atoms to unit norm"""
+    norms = np.linalg.norm(atoms, axis=1)
+    norms = np.tile(norms, (3072, 1)).T
+    atoms = atoms / norms
+    return atoms
