@@ -16,7 +16,6 @@ def load_images(path):
     else:
         images = np.genfromtxt(path, delimiter=",")
         # A trailing comma adds one pixel, remove it
-        n_images = images.shape[0]
         n_pixels = images.shape[1] - 1
         images = images[:, :n_pixels]
         np.save(path_npy, images)
@@ -25,29 +24,32 @@ def load_images(path):
 
 def vec2img(X):
     """
-    Takes images of shape (n_samples, 3072) or (3072,) and reshape to
-    (n_samples, 32, 32 ,3)
+    Takes images of shape (n_samples, n_pixels) or (n_pixels,) and reshape to
+    (n_samples, width, height, 3) with widht = height
     """
     if len(X.shape) == 1:
         X = np.expand_dims(X, axis=0)
-    assert X.shape[1] == 3*32*32
-    n_samples = X.shape[0]
-    X = X.reshape((n_samples, 3, 32, 32))
+    n_samples, n_pixels = X.shape
+    width = int(np.sqrt(n_pixels // 3))
+    assert n_pixels == 3 * width * width
+    X = X.reshape((n_samples, 3, width, width))
     X = X.transpose((0, 2, 3, 1))
     return X
 
 
-def img2vec(X_reshaped):
+def img2vec(X):
     """
-    Takes images of shape (n_samples, 32, 32 ,3) and reshape to (n_samples, 3072)
-
+    Takes images of shape (n_samples, width, height, 3) and reshape to
+    (n_samples, width * height * 3)
     """
-    assert X_reshaped.shape[1:] == (32, 32, 3)
-    n_samples = X_reshaped.shape[0]
-    X_reshaped = X_reshaped.transpose((0, 3, 1, 2))
-    X_reshaped = X_reshaped.reshape((n_samples, 3072,))
-
-    return X_reshaped
+    if len(X.shape) == 3:
+        X = np.expand_dims(X, axis=0)
+    n_samples, width, height, n_channels = X.shape
+    assert n_channels == 3
+    assert width == height
+    X = X.transpose((0, 3, 1, 2))
+    X = X.reshape((n_samples, width * height * n_channels))
+    return X
 
 
 def transform_T(Xtr_reshaped, Ytr):
