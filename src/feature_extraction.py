@@ -59,3 +59,18 @@ def sparsity_projection(coefs, sparsity):
     # (careful sometimes more than k elements kept due to equal values)
     coefs = coefs * to_keep
     return coefs
+
+
+def sparse_coding(data, atoms, coefs, sparsity, iterations=100):
+    """Get the sparse representation of data on atoms represented by coefs
+    Shapes:
+        data: (n_samples, n_pixels)
+        atoms: (n_atoms, n_pixels)
+        coefs: (n_samples, n_atoms)
+    """
+    lambd = 1/np.linalg.norm(np.dot(atoms.T, atoms))
+    for i in range(iterations):
+        error = np.dot(coefs, atoms) - data
+        coefs = sparsity_projection(coefs - lambd * np.dot(error, atoms.T),
+                                    sparsity)
+    return coefs
