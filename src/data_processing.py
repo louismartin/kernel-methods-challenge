@@ -79,8 +79,9 @@ def transform_T(Xtr_reshaped, Ytr):
 
 
 def plot_image(img):
-    assert img.shape == (3072,)
-    img = vec2img(img)[0]
+    if len(img.shape) == 1:
+        img = vec2img(img)[0]
+    assert len(img.shape) == 3
     # Convert centered values to ints between 0 and 255
     img = ((img - np.min(img))/(img.max() - img.min()) * 255).astype(np.uint8)
     plt.axis('off')
