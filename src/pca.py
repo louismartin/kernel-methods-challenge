@@ -9,7 +9,7 @@ class PCA:
         self.e_values_ = None
         self.e_values_ratio_ = None
 
-    def fit(self, X, scale=True):
+    def fit(self, X, scale=False):
 
         n_samples, n_features = X.shape
 
