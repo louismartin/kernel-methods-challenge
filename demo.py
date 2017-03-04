@@ -11,6 +11,7 @@ from sklearn.decomposition import PCA as PCAsklearn
 from src.utils import DATA_DIR
 from src.data_processing import load_images, plot_image, vec2img, img2vec, transform_T
 from src.models import KernelSVM
+from src.feature_extraction import Dictionary
 from src.pca import PCA
 
 
@@ -24,17 +25,33 @@ Ytr = np.array(Ytr_csv.tolist())
 
 print("Loaded images - shape {}".format(Xtr.shape))
 
-
-data_augment = False
-if data_augment:
+# Data augmentation
+do_data_augmentation = True
+if do_data_augmentation:
     Xtr_reshaped = vec2img(Xtr)
     tf_Xtr_reshaped, tf_Ytr = transform_T(Xtr_reshaped, Ytr)
     Xtr = img2vec(tf_Xtr_reshaped)
     Ytr = tf_Ytr
 
+# Dictionary learning
+do_dictionary_learning = False
+if do_dictionary_learning:
+    dictionary = Dictionary(n_atoms=128, atom_width=16)
+    if dictionary.weights_available:
+        print("Loading dictionary")
+        dictionary.load()
+    else:
+        print("Learning dictionary")
+        tic = time.time()
+        dictionary.fit(Xtr)
+        dictionary.save()
+        print("Dictionary learned in {0:.1f}s".format(time.time() - tic))
+    print("Getting dictionary representation")
+    Xtr = dictionary.get_representation(Xtr)
+
 # PCA
 do_pca = True
-sklearn_pca = False
+sklearn_pca = True
 if do_pca:
     tic = time.time()
     print("Applying PCA")
@@ -54,6 +71,9 @@ Xval = Xtr[n_train_samples:]
 Yval = Ytr[n_train_samples:]
 Xtr = Xtr[:n_train_samples]
 Ytr = Ytr[:n_train_samples]
+print("Training on {} samples, validating on {} samples".format(
+          Xtr.shape[0], Xval.shape[0]))
+print("Features: {}".format(Xtr.shape[1]))
 
 # Training
 print("Start training")
