@@ -52,30 +52,46 @@ def img2vec(X):
     return X
 
 
-def transform_T(Xtr_reshaped, Ytr):
+def transform_T(X, Y=None):
     """
-    Takes images Xtr_reshaped of shape  (n_samples, 32, 32 ,3) and their classes Ytr (n_samples, 1),
-    translate them 8 times,
-    and returns images of shape ( 9 * n_samples, 32, 32 ,3) and their classes of shape (9 * n_samples, 1)
+    Takes images Xtr_reshaped of shape  (n_samples, n_pixels) and their
+    classes Y (n_samples, 1), translate them 8 times,
+    and returns images of shape ( 9 * n_samples, n_pixels) and their classes
+    of shape (9 * n_samples, 1)
     """
-    size_sample = len(Xtr_reshaped)
-    number_rows = len(Xtr_reshaped[0])
-    number_cols = len(Xtr_reshaped[0][0])
+    # Reshape to (n_samples, width, height, 3)
+    X = vec2img(X)
+    if Y is not None:
+        assert len(X) == len(Y)
+    n_samples = X.shape[0]
+    n_rows = X.shape[1]
+    n_cols = X.shape[2]
 
     # Direction of translation
-    x_translations = [0, 1, 1]#, -1, -1, 0, 0, -1, 1]
-    y_translations = [0, 1, -1]#, -1, 1, -1, 1, 0, 0]
+    trans_value = 1  # How many pixels we want to translate
+    x_translations = np.array([0, 1, 1, -1, -1, 0, 0, -1, 1]) * trans_value
+    y_translations = np.array([0, 1, -1, -1, 1, -1, 1, 0, 0]) * trans_value
 
-    tf_Xtr_reshaped = np.ones((size_sample * len(x_translations), number_rows, number_cols, 3),)
-    tf_Ytr = np.ones(size_sample * len(x_translations),)
-    for j in range(len(x_translations)):
-        x_trans = x_translations[j]
-        y_trans = y_translations[j]
-        for i in range(size_sample):
-            tf_Xtr_reshaped[i - 1 + j * size_sample] = tf.warp(Xtr_reshaped[i - 1],
-                                                               AffineTransform(translation=(x_trans, y_trans)))
-            tf_Ytr[i - 1 + j * size_sample] = Ytr[i - 1]
-    return tf_Xtr_reshaped, tf_Ytr
+    n_translations = len(x_translations)
+    tf_X = np.ones((n_samples * n_translations, n_rows, n_cols, 3))
+    if Y is not None:
+        tf_Y = np.ones(n_samples * n_translations)
+    for i in range(n_samples):
+        for j in range(n_translations):
+            x_trans = x_translations[j]
+            y_trans = y_translations[j]
+            img = X[i]
+            tf_img = tf.warp(img,
+                             AffineTransform(translation=(x_trans, y_trans)))
+            tf_X[i * n_translations + j] = tf_img
+            if Y is not None:
+                tf_Y[i * n_translations + j] = Y[i]
+    # Reshape back to (n_samples, n_pixels)
+    tf_X = img2vec(tf_X)
+    if Y is not None:
+        return tf_X, tf_Y
+    else:
+        return tf_X
 
 
 def plot_image(img):

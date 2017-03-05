@@ -28,6 +28,7 @@ print("Loaded images - shape {}".format(Xtr.shape))
 # Data augmentation
 do_data_augmentation = True
 if do_data_augmentation:
+    print("Augmenting data")
     Xtr_reshaped = vec2img(Xtr)
     tf_Xtr_reshaped, tf_Ytr = transform_T(Xtr_reshaped, Ytr)
     Xtr = img2vec(tf_Xtr_reshaped)
