@@ -16,22 +16,19 @@ from src.feature_extraction import Dictionary
 from src.pca import PCA
 
 
-def learn(X, Y,
-          do_data_augmentation=False,
-          do_dictionary_learning=False,
-          do_pca=True):
+def learn(X, Y):
     pca = None
     dictionary = None
     model = None
 
     # Data augmentation
-    if do_data_augmentation:
+    if DO_DATA_AUGMENTATION:
         print("Augmenting data")
         X, Y = transform_T(X, Y)
         print("Number of samples augmented to {}".format(X.shape[0]))
 
     # Dictionary learning
-    if do_dictionary_learning:
+    if DO_DICTIONARY_LEARNING:
         dictionary = Dictionary(n_atoms=128, atom_width=16)
         if dictionary.weights_available:
             print("Loading dictionary")
@@ -47,7 +44,7 @@ def learn(X, Y,
 
     # PCA
     sklearn_pca = True
-    if do_pca:
+    if DO_PCA:
         tic = time.time()
         print("Applying PCA")
         n_components = 100
@@ -78,23 +75,20 @@ def learn(X, Y,
     return pca, dictionary, model
 
 
-def transform(X,
-              do_data_augmentation=True,
-              do_dictionary_learning=False,
-              do_pca=True):
+def transform(X):
     # Data augmentation
-    if do_data_augmentation:
+    if DO_DATA_AUGMENTATION:
         print("Augmenting data")
         X = transform_T(X)
         print("Number of samples augmented to {}".format(X.shape[0]))
 
     # Dictionary learning
-    if do_dictionary_learning:
+    if DO_DICTIONARY_LEARNING:
         print("Getting dictionary representation")
         X = dictionary.get_representation(X)
 
     # PCA
-    if do_pca:
+    if DO_PCA:
         tic = time.time()
         print("Applying PCA")
         sklearn_pca = True
@@ -106,10 +100,10 @@ def transform(X,
     return X
 
 
-def predict(X, do_data_augmentation=True):
+def predict(X):
     Ypred = model.predict(X)
 
-    if do_data_augmentation:
+    if DO_DATA_AUGMENTATION:
         # Take the class with the most votes for all translations
         n_val_samples = len(X) // 9
         Yvote = np.zeros(n_val_samples)
@@ -121,11 +115,17 @@ def predict(X, do_data_augmentation=True):
 
 
 def write_submission(Yte, Yte_path):
+    assert len(Yte) == 2000
     df = pd.DataFrame(index=np.arange(1, len(Yte) + 1),
                       data=Yte.astype(int),
                       columns=["Prediction"])
     df.to_csv(Yte_path, index_label="Id")
 
+
+# Global variables
+DO_DATA_AUGMENTATION = False
+DO_DICTIONARY_LEARNING = False
+DO_PCA = True
 
 Xtr_path = os.path.join(DATA_DIR, "Xtr.csv")
 Xte_path = os.path.join(DATA_DIR, "Xte.csv")
@@ -153,32 +153,17 @@ print("Training on {} samples, validating on {} samples".format(
           Xtr.shape[0], Xval.shape[0]))
 print("Features: {}".format(Xtr.shape[1]))
 
+pca, dictionary, model = learn(Xtr, Ytr)
 
-do_data_augmentation = False
-do_dictionary_learning = False
-do_pca = True
-pca, dictionary, model = learn(Xtr, Ytr,
-                               do_data_augmentation=do_data_augmentation,
-                               do_dictionary_learning=do_dictionary_learning,
-                               do_pca=do_pca)
+Xval = transform(Xval)
 
-Xval = transform(Xval,
-                 do_data_augmentation=do_data_augmentation,
-                 do_dictionary_learning=do_dictionary_learning,
-                 do_pca=do_pca)
-
-Ypred = predict(Xval,
-                do_data_augmentation=do_data_augmentation)
+Ypred = predict(Xval)
 
 accuracy = accuracy_score(Yval, Ypred)
 print("Accuracy: {}".format(accuracy))
 
-Xte = transform(Xte,
-                do_data_augmentation=do_data_augmentation,
-                do_dictionary_learning=do_dictionary_learning,
-                do_pca=do_pca)
+Xte = transform(Xte)
 
-Yte = predict(Xte,
-              do_data_augmentation=False)
+Yte = predict(Xte)
 
 write_submission(Yte, Yte_path)
