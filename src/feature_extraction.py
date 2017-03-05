@@ -49,7 +49,7 @@ def initialize_atoms(Xtr, n_atoms, atom_width):
     """
     # We will initialize more atoms than needed in order to take those with
     # the highest energies
-    atoms = random_patches(Xtr, 20 * n_atoms, atom_width)
+    atoms = random_patches(Xtr, 100 * n_atoms, atom_width)
     # Select atoms with highest energy
     energies = np.sum(atoms**2, axis=1)
     indexes = np.argsort(energies)[::-1][:n_atoms]
@@ -121,7 +121,7 @@ def learn_dictionary(Xtr, n_atoms, atom_width, plot=False):
         errors[2*i] = np.linalg.norm(np.dot(coefs, atoms) - data)**2
 
         # Dictionary update
-        atoms = dictionary_update(data, atoms, coefs, iterations=100)
+        atoms = dictionary_update(data, atoms, coefs, iterations=50)
         errors[2*i+1] = np.linalg.norm(np.dot(coefs, atoms) - data)**2
     path = os.path.join(DATA_DIR, "dictionary_learning_errors.npy")
     np.save(path, errors)
@@ -160,7 +160,12 @@ class Dictionary:
     def __init__(self, n_atoms, atom_width):
         self.n_atoms = n_atoms
         self.atom_width = atom_width
-        self.save_path = os.path.join(DATA_DIR, "atoms.npy")
+        filename = "atoms_{}_{}.npy".format(self.atom_width, self.n_atoms)
+        self.save_path = os.path.join(DATA_DIR, filename)
+
+    @property
+    def weights_available(self):
+        return os.path.exists(self.save_path)
 
     def fit(self, Xtr):
         self.atoms = learn_dictionary(Xtr,
@@ -168,7 +173,7 @@ class Dictionary:
                                       atom_width=self.atom_width,
                                       plot=False)
 
-    def get_representation(self, Xtr):
+    def get_representation(self, Xtr, iterations=200):
         n_samples = Xtr.shape[0]
 
         # Extract all non overlapping patches of each image
@@ -181,7 +186,7 @@ class Dictionary:
         # Get sparse representation of all patches
         coefs = np.random.rand(patches.shape[0], self.n_atoms)
         coefs = sparse_coding(patches, self.atoms, coefs,
-                              sparsity=self.n_atoms//2, iterations=1000)
+                              sparsity=self.n_atoms//2, iterations=iterations)
         coefs = coefs.reshape(n_samples, self.n_atoms * n_patches)
         return coefs
 
