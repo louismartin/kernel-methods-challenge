@@ -3,9 +3,6 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-from skimage.transform import AffineTransform
-from skimage import transform as tf
-
 
 def load_images(path):
     """ Read a csv file from path and returns a numpy array """
@@ -52,6 +49,25 @@ def img2vec(X):
     return X
 
 
+def translate(img, x_shift, y_shift):
+    """
+    Translates images by given x and y shifts
+    Pad zeros after translation is done
+    """
+    res = np.copy(img)
+    # x shift 
+    res = np.roll(res, shift=-x_shift, axis=1)
+    # pad zeros 
+    if x_shift > 0:
+        res[:, -1, :] = 0
+    # y shift
+    res = np.roll(res, shift=-y_shift, axis=0)
+    # pad zeros 
+    if y_shift > 0:
+        res[-1, :, :] = 0
+    return res
+        
+
 def transform_T(X, Y=None):
     """
     Takes images Xtr_reshaped of shape  (n_samples, n_pixels) and their
@@ -81,8 +97,7 @@ def transform_T(X, Y=None):
             x_trans = x_translations[j]
             y_trans = y_translations[j]
             img = X[i]
-            tf_img = tf.warp(img,
-                             AffineTransform(translation=(x_trans, y_trans)))
+            tf_img = translate(img,x_trans, y_trans)
             tf_X[i * n_translations + j] = tf_img
             if Y is not None:
                 tf_Y[i * n_translations + j] = Y[i]
