@@ -53,3 +53,9 @@ def plot_confusion_matrix(cm, classes,
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
+
+
+def accuracy_score(Yval, Ypred):
+    assert len(Yval) == len(Ypred)
+    accuracy = np.sum(Yval == Ypred) / len(Yval)
+    return accuracy

@@ -4,9 +4,8 @@ import time
 
 import pandas as pd
 import numpy as np
-from sklearn.metrics import accuracy_score
 
-from src.utils import DATA_DIR
+from src.utils import DATA_DIR, accuracy_score
 from src.data_processing import load_images, transform_T
 from src.models import KernelSVM
 from src.feature_extraction import Dictionary
