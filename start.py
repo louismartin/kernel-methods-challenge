@@ -5,9 +5,6 @@ import time
 import pandas as pd
 import numpy as np
 from sklearn.metrics import accuracy_score
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn import svm
-from sklearn.decomposition import PCA as PCAsklearn
 
 from src.utils import DATA_DIR
 from src.data_processing import load_images, transform_T
@@ -43,33 +40,21 @@ def learn(X, Y):
         X = dictionary.get_representation(X)
 
     # PCA
-    sklearn_pca = True
     if DO_PCA:
         tic = time.time()
         print("Applying PCA")
         n_components = 100
-        if sklearn_pca:
-            pca = PCAsklearn(n_components=n_components)
-            X = pca.fit_transform(X)
-            print("Variance explained: {:.2f}".format(
-                      np.sum(pca.explained_variance_ratio_)))
-        else:
-            pca = PCA(n_components=n_components)
-            X = pca.fit(X, scale=False)
-            print("Variance explained: {:.2f}".format(
-                      np.sum(pca.e_values_ratio_)))
+        pca = PCA(n_components=n_components)
+        X = pca.fit(X, scale=False)
+        print("Variance explained: {:.2f}".format(
+                  np.sum(pca.e_values_ratio_)))
         print("PCA applied in {0:.1f}s".format(time.time() - tic))
 
     # Training
     print("Starting training")
-    sklearn_svm = True
     tic = time.time()
-    if sklearn_svm:
-        model = OneVsRestClassifier(svm.SVC(C=1., kernel='rbf', gamma=0.1))
-        model.fit(X, Y)
-    else:
-        model = KernelSVM(C=1, kernel='linear')
-        model.train(X, Y)
+    model = KernelSVM(C=1, kernel='rbf')
+    model.train(X, Y)
     print("Model trained in {0:.1f}s".format(time.time() - tic))
 
     return pca, dictionary, model
@@ -91,11 +76,7 @@ def transform(X):
     if DO_PCA:
         tic = time.time()
         print("Applying PCA")
-        sklearn_pca = True
-        if sklearn_pca:
-            X = pca.transform(X)
-        else:
-            X = pca.transform(X, scale=False)
+        X = pca.transform(X, scale=False)
         print("PCA applied in {0:.1f}s".format(time.time() - tic))
     return X
 
@@ -135,7 +116,6 @@ Yte_path = os.path.join(DATA_DIR, "Yte.csv")
 Xtr = load_images(Xtr_path)
 Xte = load_images(Xte_path)
 Ytr_csv = pd.read_csv(Ytr_path).Prediction
-Ytr_unique = Ytr_csv.unique()
 Ytr = np.array(Ytr_csv.tolist())
 
 print("Loaded images - shape {}".format(Xtr.shape))
